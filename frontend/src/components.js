@@ -447,71 +447,111 @@ export const Header = () => {
 // Hero Section Component with Cinematic Effects
 export const HeroSection = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoaded(true), 500);
     return () => clearTimeout(timer);
   }, []);
 
+  const handlePrimaryAction = () => {
+    if (user) {
+      // Redirect to Neural Labs if user is logged in
+      window.location.href = '#neural-labs';
+    } else {
+      setShowEmailModal(true);
+    }
+  };
+
+  const handleSecondaryAction = () => {
+    if (user) {
+      // Redirect to consultation booking
+      window.location.href = '#consultation';
+    } else {
+      setShowAuthModal(true);
+    }
+  };
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-deep-space">
-      {/* Animated Background */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1647356191320-d7a1f80ca777"
-          alt="Neural network cosmos"
-          className="w-full h-full object-cover opacity-40 animate-float"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-deep-space/80 via-deep-space/60 to-deep-space/80"></div>
-      </div>
-      
-      {/* Floating Neural Network */}
-      <div className="absolute inset-0 z-5">
-        <NeuralNetwork />
-      </div>
-      
-      {/* Orbiting Elements */}
-      <div className="absolute top-1/4 right-1/4 w-4 h-4 bg-neural-blue rounded-full animate-orbit opacity-60"></div>
-      <div className="absolute bottom-1/3 left-1/3 w-6 h-6 bg-neural-pink rounded-full animate-orbit opacity-40" style={{animationDelay: '5s', animationDuration: '25s'}}></div>
-      
-      {/* Content */}
-      <div className="relative z-10 text-center max-w-5xl mx-auto px-6">
-        <div className="mb-8">
-          {isLoaded && (
-            <>
-              <div className="text-white text-7xl md:text-8xl font-space font-bold mb-2 animate-fadeInUp">
-                <TerminalText text="NeuroGrid" delay={0} />
-              </div>
-              <div className="text-neural-blue text-7xl md:text-8xl font-space font-bold animate-fadeInUp">
-                <TerminalText text="AI" delay={1000} />
-              </div>
-            </>
-          )}
+    <>
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-deep-space">
+        {/* Animated Background */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="https://images.unsplash.com/photo-1647356191320-d7a1f80ca777"
+            alt="Neural network cosmos"
+            className="w-full h-full object-cover opacity-40 animate-float"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-deep-space/80 via-deep-space/60 to-deep-space/80"></div>
         </div>
         
-        <div className="mb-8 animate-fadeInUp" style={{animationDelay: '2s'}}>
-          <div className="inline-block bg-neural-gradient text-white px-8 py-3 rounded-full text-lg font-futuristic font-bold tracking-wider animate-glow">
-            Neural Intelligence • Infinite Possibilities
+        {/* Floating Neural Network */}
+        <div className="absolute inset-0 z-5">
+          <NeuralNetwork />
+        </div>
+        
+        {/* Orbiting Elements */}
+        <div className="absolute top-1/4 right-1/4 w-4 h-4 bg-neural-blue rounded-full animate-orbit opacity-60"></div>
+        <div className="absolute bottom-1/3 left-1/3 w-6 h-6 bg-neural-pink rounded-full animate-orbit opacity-40" style={{animationDelay: '5s', animationDuration: '25s'}}></div>
+        
+        {/* Content */}
+        <div className="relative z-10 text-center max-w-5xl mx-auto px-6">
+          <div className="mb-8">
+            {isLoaded && (
+              <>
+                <div className="text-white text-7xl md:text-8xl font-space font-bold mb-2 animate-fadeInUp">
+                  <TerminalText text="NeuroGrid" delay={0} />
+                </div>
+                <div className="text-neural-blue text-7xl md:text-8xl font-space font-bold animate-fadeInUp">
+                  <TerminalText text="AI" delay={1000} />
+                </div>
+              </>
+            )}
+          </div>
+          
+          <div className="mb-8 animate-fadeInUp" style={{animationDelay: '2s'}}>
+            <div className="inline-block bg-neural-gradient text-white px-8 py-3 rounded-full text-lg font-futuristic font-bold tracking-wider animate-glow">
+              Neural Intelligence • Infinite Possibilities
+            </div>
+          </div>
+          
+          <p className="text-gray-300 text-xl mb-12 max-w-3xl mx-auto leading-relaxed font-tech animate-fadeInUp" style={{animationDelay: '2.5s'}}>
+            Harness the power of advanced neural networks to transform your business operations. 
+            Experience AI that thinks, learns, and evolves with your enterprise.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fadeInUp" style={{animationDelay: '3s'}}>
+            <button 
+              onClick={handlePrimaryAction}
+              className="bg-neural-gradient text-white px-10 py-4 rounded-lg font-tech font-bold text-lg tracking-wider 
+                         hover:scale-105 transition-all duration-300 animate-glow shadow-2xl"
+            >
+              {user ? 'ACCESS NEURAL LABS' : 'ACTIVATE NEURAL GRID'}
+            </button>
+            <button 
+              onClick={handleSecondaryAction}
+              className="border-2 border-neural-blue text-neural-blue px-10 py-4 rounded-lg font-tech font-bold text-lg tracking-wider 
+                         hover:bg-neural-blue hover:text-deep-space transition-all duration-300 hover:scale-105 shadow-2xl"
+            >
+              {user ? 'BOOK CONSULTATION' : 'EXPLORE INTELLIGENCE'}
+            </button>
           </div>
         </div>
-        
-        <p className="text-gray-300 text-xl mb-12 max-w-3xl mx-auto leading-relaxed font-tech animate-fadeInUp" style={{animationDelay: '2.5s'}}>
-          Harness the power of advanced neural networks to transform your business operations. 
-          Experience AI that thinks, learns, and evolves with your enterprise.
-        </p>
-        
-        <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fadeInUp" style={{animationDelay: '3s'}}>
-          <button className="bg-neural-gradient text-white px-10 py-4 rounded-lg font-tech font-bold text-lg tracking-wider 
-                           hover:scale-105 transition-all duration-300 animate-glow shadow-2xl">
-            ACTIVATE NEURAL GRID
-          </button>
-          <button className="border-2 border-neural-blue text-neural-blue px-10 py-4 rounded-lg font-tech font-bold text-lg tracking-wider 
-                           hover:bg-neural-blue hover:text-deep-space transition-all duration-300 hover:scale-105 shadow-2xl">
-            EXPLORE INTELLIGENCE
-          </button>
-        </div>
-      </div>
-    </section>
+      </section>
+      
+      <EmailCaptureModal 
+        isOpen={showEmailModal} 
+        onClose={() => setShowEmailModal(false)}
+        onSuccess={() => console.log('Email captured successfully!')}
+      />
+      
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+      />
+    </>
   );
 };
 
