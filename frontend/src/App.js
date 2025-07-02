@@ -8,7 +8,8 @@ import {
   IntelligenceModules, 
   NeuralLabsSection, 
   CTASection, 
-  Footer 
+  Footer,
+  AuthProvider
 } from './components';
 
 const Home = () => {
@@ -28,11 +29,13 @@ const Home = () => {
 function App() {
   return (
     <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </div>
   );
 }
