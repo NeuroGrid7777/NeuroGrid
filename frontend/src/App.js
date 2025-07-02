@@ -4,21 +4,21 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { 
   Header, 
   HeroSection, 
-  StatsSection, 
-  BusinessSection, 
-  ServicesSection, 
+  NeuralStatsSection, 
+  IntelligenceModules, 
+  NeuralLabsSection, 
   CTASection, 
   Footer 
 } from './components';
 
 const Home = () => {
   return (
-    <div className="bg-black min-h-screen">
+    <div className="bg-deep-space min-h-screen">
       <Header />
       <HeroSection />
-      <StatsSection />
-      <BusinessSection />
-      <ServicesSection />
+      <NeuralStatsSection />
+      <IntelligenceModules />
+      <NeuralLabsSection />
       <CTASection />
       <Footer />
     </div>
