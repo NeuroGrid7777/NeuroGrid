@@ -693,79 +693,158 @@ export const IntelligenceModules = () => {
   );
 };
 
-// Neural Labs Section
+# Neural Labs Section
 export const NeuralLabsSection = () => {
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const { user } = useAuth();
+
   const labs = [
     {
-      title: "Deep Learning Academy",
-      description: "Master advanced neural architectures and quantum AI principles through immersive, hands-on training programs.",
+      id: 'starter',
+      title: "Neural Starter Package",
+      price: 99,
+      description: "Master neural architectures and quantum AI principles through immersive training.",
       image: "https://images.unsplash.com/photo-1520509414578-d9cbf09933a1",
-      tech: "Python • TensorFlow • PyTorch"
+      tech: "Python • TensorFlow • PyTorch",
+      features: [
+        "Basic AI Automation Course",
+        "5 Neural Network Templates", 
+        "Community Access",
+        "Email Support"
+      ]
     },
     {
-      title: "AI Strategy Consulting", 
-      description: "One-on-one guidance from neural network specialists to architect your AI transformation roadmap.",
+      id: 'professional',
+      title: "Neural Professional Package", 
+      price: 299,
+      description: "Advanced guidance from neural network specialists for enterprise transformation.",
       image: "https://images.unsplash.com/photo-1728995025396-b5141e209455",
-      tech: "Strategy • Architecture • Implementation"
+      tech: "Strategy • Architecture • Implementation",
+      features: [
+        "Complete AI Automation Suite",
+        "20+ Neural Network Templates",
+        "1-on-1 Mentorship (2 sessions)",
+        "Priority Support",
+        "Advanced Workshops"
+      ]
     },
     {
-      title: "Neural Code Repository",
-      description: "Access cutting-edge AI models, pre-trained networks, and deployment-ready neural architectures.",
+      id: 'enterprise',
+      title: "Neural Enterprise Package",
+      price: 599,
+      description: "Complete neural intelligence transformation with unlimited access.",
       image: "https://images.unsplash.com/photo-1615223424613-76b8ca0cfdb2",
-      tech: "Models • APIs • Frameworks"
+      tech: "Full Stack • APIs • Frameworks",
+      features: [
+        "Full Neural Labs Access",
+        "Unlimited Templates & Resources",
+        "Weekly 1-on-1 Mentorship",
+        "Custom AI Development",
+        "24/7 Priority Support",
+        "Enterprise Integration"
+      ]
     }
   ];
 
+  const handlePackageSelect = (packageData) => {
+    if (!user) {
+      alert('Please login to purchase a package');
+      return;
+    }
+    setSelectedPackage(packageData);
+    setShowPaymentModal(true);
+  };
+
   return (
-    <section className="bg-black py-20 relative">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="w-full h-full bg-neural-gradient"></div>
-      </div>
-      
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="text-center mb-16">
-          <h2 className="text-white text-5xl md:text-6xl font-space font-bold mb-8">
-            Neural <span className="text-neural-blue">Labs</span>
-          </h2>
-          <p className="text-gray-300 text-xl max-w-4xl mx-auto font-tech leading-relaxed">
-            Advanced research facilities where cutting-edge AI technologies are developed, 
-            tested, and refined for real-world applications.
-          </p>
+    <>
+      <section id="neural-labs" className="bg-black py-20 relative">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="w-full h-full bg-neural-gradient"></div>
         </div>
         
-        <div className="grid md:grid-cols-3 gap-10">
-          {labs.map((lab, index) => (
-            <div key={index} className="group cursor-pointer">
-              <div className="bg-deep-space/80 rounded-2xl overflow-hidden hover:bg-deep-space transition-all duration-500 border border-neural-blue/20 hover:border-neural-blue/50">
-                <div className="h-64 overflow-hidden relative">
-                  <img 
-                    src={lab.image}
-                    alt={lab.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-neural-gradient opacity-20 group-hover:opacity-40 transition-opacity"></div>
-                </div>
-                <div className="p-8">
-                  <div className="text-neural-blue text-sm font-futuristic font-bold mb-3 tracking-wider">
-                    {lab.tech}
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-16">
+            <h2 className="text-white text-5xl md:text-6xl font-space font-bold mb-8">
+              Neural <span className="text-neural-blue">Labs</span>
+            </h2>
+            <p className="text-gray-300 text-xl max-w-4xl mx-auto font-tech leading-relaxed">
+              Advanced research facilities where cutting-edge AI technologies are developed, 
+              tested, and refined for real-world applications.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-10">
+            {labs.map((lab, index) => (
+              <div key={index} className="group cursor-pointer">
+                <div className="bg-deep-space/80 rounded-2xl overflow-hidden hover:bg-deep-space transition-all duration-500 border border-neural-blue/20 hover:border-neural-blue/50">
+                  <div className="h-64 overflow-hidden relative">
+                    <img 
+                      src={lab.image}
+                      alt={lab.title}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-neural-gradient opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                    
+                    {/* Price Badge */}
+                    <div className="absolute top-4 right-4 bg-neural-gradient text-white px-4 py-2 rounded-full font-bold">
+                      ${lab.price}
+                    </div>
                   </div>
-                  <h3 className="text-white text-2xl font-space font-bold mb-4">{lab.title}</h3>
-                  <p className="text-gray-300 leading-relaxed font-tech">{lab.description}</p>
+                  
+                  <div className="p-8">
+                    <div className="text-neural-blue text-sm font-futuristic font-bold mb-3 tracking-wider">
+                      {lab.tech}
+                    </div>
+                    <h3 className="text-white text-2xl font-space font-bold mb-4">{lab.title}</h3>
+                    <p className="text-gray-300 leading-relaxed font-tech mb-6">{lab.description}</p>
+                    
+                    {/* Features List */}
+                    <ul className="space-y-2 mb-6">
+                      {lab.features.map((feature, idx) => (
+                        <li key={idx} className="text-gray-400 text-sm flex items-center">
+                          <span className="text-neural-green mr-2">✓</span>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                    
+                    <button
+                      onClick={() => handlePackageSelect(lab)}
+                      className="w-full bg-neural-gradient text-white py-3 rounded-lg font-tech font-bold hover:scale-105 transition-all duration-300 shadow-lg"
+                    >
+                      {user ? 'Purchase Package' : 'Login to Purchase'}
+                    </button>
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
+          
+          <div className="text-center mt-16">
+            <div className="bg-deep-space/50 border border-neural-blue/30 rounded-2xl p-8 max-w-2xl mx-auto">
+              <h3 className="text-white text-2xl font-space font-bold mb-4">
+                Not sure which package is right for you?
+              </h3>
+              <p className="text-gray-300 mb-6 font-tech">
+                Book a free consultation with our neural intelligence specialists to find the perfect fit.
+              </p>
+              <button className="bg-transparent border-2 border-neural-blue text-neural-blue px-8 py-3 rounded-lg font-tech font-bold hover:bg-neural-blue hover:text-deep-space transition-all duration-300">
+                Schedule Free Consultation
+              </button>
             </div>
-          ))}
+          </div>
         </div>
-        
-        <div className="text-center mt-16">
-          <button className="bg-neural-gradient text-white px-12 py-4 rounded-lg font-tech font-bold text-lg tracking-wider 
-                           hover:scale-105 transition-all duration-300 animate-glow shadow-2xl">
-            ACCESS NEURAL LABS
-          </button>
-        </div>
-      </div>
-    </section>
+      </section>
+      
+      <PaymentModal 
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        packageId={selectedPackage?.id}
+        packageInfo={selectedPackage}
+      />
+    </>
   );
 };
 
