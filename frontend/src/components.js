@@ -1,4 +1,338 @@
 import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+
+// API Configuration
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
+
+// Auth Context
+const AuthContext = React.createContext();
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      fetchUserProfile();
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await axios.get(`${API}/auth/me`);
+      setUser(response.data);
+    } catch (error) {
+      localStorage.removeItem('auth_token');
+      delete axios.defaults.headers.common['Authorization'];
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const login = async (email, password) => {
+    const response = await axios.post(`${API}/auth/login`, { email, password });
+    const { access_token } = response.data;
+    
+    localStorage.setItem('auth_token', access_token);
+    axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+    
+    await fetchUserProfile();
+    return response.data;
+  };
+
+  const register = async (email, password, full_name) => {
+    const response = await axios.post(`${API}/auth/register`, {
+      email,
+      password,
+      full_name
+    });
+    return response.data;
+  };
+
+  const logout = () => {
+    localStorage.removeItem('auth_token');
+    delete axios.defaults.headers.common['Authorization'];
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => React.useContext(AuthContext);
+
+// Email Capture Component
+const EmailCaptureModal = ({ isOpen, onClose, onSuccess }) => {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setIsSubmitting(true);
+    setMessage('');
+
+    try {
+      const response = await axios.post(`${API}/email/capture`, {
+        email,
+        source: 'hero_cta',
+        newsletter_consent: true
+      });
+
+      setMessage(response.data.message);
+      setTimeout(() => {
+        onSuccess();
+        onClose();
+      }, 2000);
+    } catch (error) {
+      setMessage('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+      <div className="bg-deep-space border border-neural-blue/30 rounded-2xl p-8 max-w-md w-full mx-4">
+        <div className="text-center mb-6">
+          <h3 className="text-white text-2xl font-space font-bold mb-2">
+            Join the Neural Grid
+          </h3>
+          <p className="text-gray-300 font-tech">
+            Get exclusive access to AI automation insights and quantum processing updates.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            className="w-full px-4 py-3 bg-black/50 border border-neural-blue/30 rounded-lg text-white placeholder-gray-400 focus:border-neural-blue focus:outline-none"
+            required
+          />
+          
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-neural-gradient text-white py-3 rounded-lg font-tech font-bold hover:scale-105 transition-all duration-300 disabled:opacity-50"
+          >
+            {isSubmitting ? 'Activating Neural Grid...' : 'Activate Neural Grid'}
+          </button>
+        </form>
+
+        {message && (
+          <p className="text-center text-neural-green mt-4 font-tech">
+            {message}
+          </p>
+        )}
+
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-white"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Payment Component
+const PaymentModal = ({ isOpen, onClose, packageId, packageInfo }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { user } = useAuth();
+
+  const handlePayment = async () => {
+    if (!user) {
+      alert('Please login to purchase');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const response = await axios.post(`${API}/payments/checkout/session`, {
+        package_id: packageId,
+        payment_type: 'course',
+        item_id: packageId
+      });
+
+      // Redirect to Stripe Checkout
+      window.location.href = response.data.url;
+    } catch (error) {
+      alert('Payment initialization failed. Please try again.');
+      setIsProcessing(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+      <div className="bg-deep-space border border-neural-blue/30 rounded-2xl p-8 max-w-md w-full mx-4">
+        <h3 className="text-white text-2xl font-space font-bold mb-4">
+          {packageInfo?.name}
+        </h3>
+        
+        <div className="text-center mb-6">
+          <div className="text-neural-blue text-4xl font-bold mb-2">
+            ${packageInfo?.price}
+          </div>
+          <p className="text-gray-300">One-time payment for lifetime access</p>
+        </div>
+
+        <button
+          onClick={handlePayment}
+          disabled={isProcessing || !user}
+          className="w-full bg-neural-gradient text-white py-3 rounded-lg font-tech font-bold hover:scale-105 transition-all duration-300 disabled:opacity-50 mb-4"
+        >
+          {isProcessing ? 'Initializing Payment...' : 'Proceed to Payment'}
+        </button>
+
+        {!user && (
+          <p className="text-center text-yellow-400 text-sm">
+            Please login first to purchase this package
+          </p>
+        )}
+
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-white"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Auth Modal Component
+const AuthModal = ({ isOpen, onClose, mode = 'login' }) => {
+  const [currentMode, setCurrentMode] = useState(mode);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    full_name: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState('');
+  const { login, register } = useAuth();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setMessage('');
+
+    try {
+      if (currentMode === 'login') {
+        await login(formData.email, formData.password);
+        setMessage('Login successful!');
+        setTimeout(onClose, 1000);
+      } else {
+        await register(formData.email, formData.password, formData.full_name);
+        setMessage('Registration successful! Please login.');
+        setCurrentMode('login');
+      }
+    } catch (error) {
+      setMessage(error.response?.data?.detail || 'An error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+      <div className="bg-deep-space border border-neural-blue/30 rounded-2xl p-8 max-w-md w-full mx-4">
+        <h3 className="text-white text-2xl font-space font-bold mb-6 text-center">
+          {currentMode === 'login' ? 'Neural Access Login' : 'Join Neural Grid'}
+        </h3>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {currentMode === 'register' && (
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={formData.full_name}
+              onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+              className="w-full px-4 py-3 bg-black/50 border border-neural-blue/30 rounded-lg text-white placeholder-gray-400 focus:border-neural-blue focus:outline-none"
+              required
+            />
+          )}
+          
+          <input
+            type="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={(e) => setFormData({...formData, email: e.target.value})}
+            className="w-full px-4 py-3 bg-black/50 border border-neural-blue/30 rounded-lg text-white placeholder-gray-400 focus:border-neural-blue focus:outline-none"
+            required
+          />
+          
+          <input
+            type="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={(e) => setFormData({...formData, password: e.target.value})}
+            className="w-full px-4 py-3 bg-black/50 border border-neural-blue/30 rounded-lg text-white placeholder-gray-400 focus:border-neural-blue focus:outline-none"
+            required
+          />
+          
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-neural-gradient text-white py-3 rounded-lg font-tech font-bold hover:scale-105 transition-all duration-300 disabled:opacity-50"
+          >
+            {isSubmitting 
+              ? (currentMode === 'login' ? 'Accessing...' : 'Creating Account...') 
+              : (currentMode === 'login' ? 'Access Neural Grid' : 'Join Neural Grid')
+            }
+          </button>
+        </form>
+
+        {message && (
+          <p className={`text-center mt-4 font-tech ${message.includes('successful') ? 'text-neural-green' : 'text-red-400'}`}>
+            {message}
+          </p>
+        )}
+
+        <div className="text-center mt-4">
+          <button
+            onClick={() => setCurrentMode(currentMode === 'login' ? 'register' : 'login')}
+            className="text-neural-blue hover:text-neural-purple transition-colors font-tech"
+          >
+            {currentMode === 'login' 
+              ? "Don't have an account? Join Neural Grid" 
+              : "Already have an account? Login"
+            }
+          </button>
+        </div>
+
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-white"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+  );
+};
 
 // Terminal Effect Component
 const TerminalText = ({ text, delay = 0 }) => {
